@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<title>Outer Banks Quiz</title>
+
+<style>
+body{
+    font-family:Arial;
+    text-align:center;
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    color:white;
+    direction:rtl;
+}
+h1{margin-top:20px;}
+
+.characters{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+}
+.character{
+    cursor:pointer;
+    background:#fff;
+    color:#000;
+    border-radius:20px;
+    padding:10px;
+    width:140px;
+    transition:0.3s;
+}
+.character:hover{transform:scale(1.05);}
+.character img{
+    width:100%;
+    border-radius:15px;
+}
+
+.hidden{display:none;}
+
+#startQuiz{
+    margin:30px;
+    font-size:26px;
+    padding:16px 40px;
+    background:linear-gradient(135deg,#43e97b,#38f9d7);
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+}
+
+#levelSelect button{
+    margin:10px;
+    padding:14px 30px;
+    font-size:20px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+}
+
+#quizContainer{
+    display:none;
+    max-width:750px;
+    margin:auto;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    padding:30px;
+    border-radius:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.question{font-size:26px;margin-bottom:20px;}
+
+.options button{
+    display:block;
+    width:85%;
+    margin:12px auto;
+    padding:14px;
+    font-size:20px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+}
+
+.result{font-size:28px;margin-top:20px;}
+
+#exitQuiz{
+    margin-top:20px;
+    padding:12px 30px;
+    font-size:18px;
+    border-radius:25px;
+    border:none;
+    cursor:pointer;
+    background:#ff4d4d;
+    color:white;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌊 Outer Banks – חידון 🌴</h1>
+
+<div class="characters">
+    <div class="character" onclick="showInfo('char1')"><p>Kiara</p><img src="https://i.pinimg.com/236x/bd/84/00/bd84006fe6c5a3c2c289d4a49703ea72.jpg"></div>
+    <div class="character" onclick="showInfo('char5')"><p>Sara</p><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU0J5bh_XSz4cTnFpLpGqMYV9K1fu6suaPMg&s"></div>
+    <div class="character" onclick="showInfo('char3')"><p>Cleo</p><img src="https://i.pinimg.com/736x/b1/38/d7/b138d731683757b38b2b0773244972ec.jpg"></div>
+    <div class="character" onclick="showInfo('char4')"><p>John B</p><img src="https://i.pinimg.com/736x/40/ca/7b/40ca7bed7ff05dbd353dfcf068d0194e.jpg"></div>
+    <div class="character" onclick="showInfo('char2')"><p>JJ</p><img src="https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da841838dc4a85ed100c1f0bab2e"></div>
+    <div class="character" onclick="showInfo('char6')"><p>Pope</p><img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcR7NCsqoKC0MX8Nbyc2EwGfaU0HEWE1tVBc26YgdagDJJ7djw5c"></div>
+</div>
+
+<div id="info">
+<p id="char1" class="hidden">קיארה – אידיאליסטית ונאמנה.</p>
+<p id="char2" class="hidden">JJ – אימפולסיבי ונאמן.</p>
+<p id="char3" class="hidden">קליאו – חכמה ושורדת.</p>
+<p id="char4" class="hidden">ג'ון בי – מנהיג הפוגס.</p>
+<p id="char5" class="hidden">שרה – בין אהבה לעושר.</p>
+<p id="char6" class="hidden">פופ – המוח של הקבוצה.</p>
+</div>
+
+<button id="startQuiz">🚀 התחל חידון</button>
+
+<div id="levelSelect" style="display:none;">
+    <button onclick="startLevel('easy')">🟢 רמה קלה</button>
+    <button onclick="startLevel('hard')">🔵 רמה קשה</button>
+    <button onclick="startLevel('extreme')">🔴 רמה אקסטרים</button>
+</div>
+
+<div id="quizContainer">
+    <div id="questionBox" class="question"></div>
+    <div id="optionsBox" class="options"></div>
+    <div id="resultBox" class="result"></div>
+    <button id="exitQuiz" onclick="exitQuiz()">🚪 יציאה מהחידון</button>
+</div>
+
+<audio id="happySound" src="https://www.soundjay.com/misc/sounds/magic-chime-02.mp3"></audio>
+<audio id="sadSound" src="https://www.soundjay.com/misc/sounds/fail-buzzer-02.mp3"></audio>
+
+<script>
+let quizStarted=false;
+let currentQuestion=0;
+let score=0;
+let quizQuestions=[];
+
+const levels={
+easy:[
+{q:"מה התכונה של קיארה?",options:["עושר","נאמנות","כוח"],correct:1},
+{q:"מי המנהיג?",options:["JJ","פופ","ג'ון בי"],correct:2},
+{q:"מי אימפולסיבי?",options:["שרה","JJ","קליאו"],correct:1},
+{q:"מה פופ מייצג?",options:["חוכמה","כסף","כוח"],correct:0},
+{q:"מי קוק?",options:["שרה","קיארה","קליאו"],correct:0}
+],
+hard:[
+{q:"מי אבא של ג'ון בי?",options:["וורד","ביג ג'ון","לוק"],correct:1},
+{q:"מי אבא של JJ?",options:["לוק","וורד","פופ"],correct:0},
+{q:"מי עזר בנסאו?",options:["קליאו","טופר","רייף"],correct:0},
+{q:"איפה הזהב?",options:["כנסייה","מערה","מטוס"],correct:0},
+{q:"מי החכם?",options:["JJ","פופ","ג'ון בי"],correct:1}
+],
+extreme:[
+{q:"איך נקרא האוצר בעונה 2?",options:["הכתר","צלב סנטו דומינגו","זהב"],correct:1},
+{q:"מי ירה בשריף?",options:["וורד","רייף","לוק"],correct:1},
+{q:"איך פוגשים את קליאו?",options:["שוד","ספינה","בריחה"],correct:1},
+{q:"מי כמעט הרג את שרה?",options:["טופר","רייף","וורד"],correct:1},
+{q:"איך מגיעים לפוגלנדיה?",options:["סירה","מטוס","ספינה נטושה"],correct:2}
+]
+};
+
+function showInfo(id){
+if(quizStarted)return;
+document.querySelectorAll('#info p').forEach(p=>p.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+}
+
+document.getElementById('startQuiz').onclick=()=>{
+document.getElementById('startQuiz').style.display='none';
+document.getElementById('levelSelect').style.display='block';
+};
+
+function startLevel(level){
+quizStarted=true;
+quizQuestions=[...levels[level]];
+currentQuestion=0;
+score=0;
+document.getElementById('levelSelect').style.display='none';
+document.getElementById('quizContainer').style.display='block';
+showQuestion();
+}
+
+function exitQuiz(){
+location.reload();
+}
+
+function showQuestion(){
+if(currentQuestion>=quizQuestions.length){
+document.getElementById('quizContainer').innerHTML=
+`<h2>🎉 סיימת!</h2>
+<p>ניקוד: ${score} / ${quizQuestions.length}</p>
+<button onclick="location.reload()">שחק שוב 🔄</button>`;
+return;
+}
+
+const q=quizQuestions[currentQuestion];
+questionBox.textContent=q.q;
+optionsBox.innerHTML='';
+resultBox.textContent='';
+
+q.options.forEach((opt,i)=>{
+const btn=document.createElement('button');
+btn.textContent=opt;
+btn.onclick=()=>{
+document.querySelectorAll('.options button').forEach(b=>b.disabled=true);
+if(i===q.correct){
+score++;
+happySound.play();
+resultBox.textContent="🎉 נכון!";
+}else{
+sadSound.play();
+resultBox.textContent="😢 לא נכון";
+}
+setTimeout(()=>{currentQuestion++;showQuestion();},1500);
+};
+optionsBox.appendChild(btn);
+});
+}
+</script>
+
+</body>
+</html>
